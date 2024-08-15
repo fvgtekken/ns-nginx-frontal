@@ -177,3 +177,32 @@ proxy_intercept_errors on; y error_page 502 = @fcvg-public-next_fallback;: Permi
 Bloque de servidor predeterminado: Este bloque actúa como un servidor de respaldo que maneja cualquier solicitud que no coincida con los otros servidores definidos. Devuelve un código de estado 503 (Servicio No Disponible) para indicar que no hay servicios disponibles.
 
 // Para probar la renovacion de certificados dentro del inspect de portainer: certbot renew --dry-run
+
+# Configuración para la ruta principal
+
+        location ^~ / {
+            proxy_set_header X-Real-IP  $remote_addr;
+            proxy_set_header X-Forwarded-For $remote_addr;
+            proxy_set_header Host $host;
+
+            proxy_read_timeout 10s;
+            proxy_connect_timeout 5s;
+            proxy_send_timeout 5s;
+
+            proxy_pass http://ns-front; # Usar upstream definido
+            proxy_next_upstream error timeout invalid_header http_502 http_503 http_504;
+            proxy_intercept_errors on;
+            error_page 502 = @ns-front_fallback;
+
+            # Bloquear solicitudes peligrosas
+            if ($request_uri ~* "\.(php|sh)") {
+                return 403;
+            }
+
+            # Bloquea solicitudes que intentan acceder a scripts CGI
+            location ~* /(\.|/)\.(cgi|sh|pl|py|php|asp|jsp|exe|bat|bin|dll) {
+                return 403;
+            }
+
+            limit_req zone=req_limit_per_ip burst=20 nodelay;
+        }
