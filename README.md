@@ -123,21 +123,21 @@ SecDefaultAction \"phase:1,deny,log\"
 SecServerSignature fcvgServer
 _/
 
-    location ^~ /soft-vault/ {
-        rewrite ^/soft-vault(/.*)$ $1 break;
-        proxy_set_header X-Real-IP  $remote_addr;
-        proxy_set_header X-Forwarded-For $remote_addr;
-        proxy_set_header Host $host;
+        location ^~ /soft-vault/ {
+            rewrite ^/soft-vault(/.*)$ $1 break;
+            proxy_set_header X-Real-IP  $remote_addr;
+            proxy_set_header X-Forwarded-For $remote_addr;
+            proxy_set_header Host $host;
 
-        proxy_read_timeout 10s;
-        proxy_connect_timeout 5s;
-        proxy_send_timeout 5s;
+            proxy_read_timeout 10s;
+            proxy_connect_timeout 5s;
+            proxy_send_timeout 5s;
 
-        proxy_pass http://softvalue-public-next:5001/;
-        proxy_next_upstream error timeout invalid_header http_502 http_503 http_504;
-        proxy_intercept_errors on;
-        error_page 502 = @softvalue-public-next_fallback;
-    }
+            proxy_pass http://softvalue-public-next:5001/;
+            proxy_next_upstream error timeout invalid_header http_502 http_503 http_504;
+            proxy_intercept_errors on;
+            error_page 502 = @softvalue-public-next_fallback;
+        }
 
      location ^~ / {
         proxy_set_header X-Real-IP  $remote_addr;
