@@ -1,0 +1,15 @@
+services:
+  frontend:
+    container_name: ns-nginx-frontal
+    image: ghcr.io/fvgtekken/ns-nginx-frontal:latest
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+    networks:
+      - my-network-front
+networks:
+  my-network-front:
+    name: default-network-front
+    driver: bridge
