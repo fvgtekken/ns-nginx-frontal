@@ -1,9 +1,10 @@
-# Usar una imagen base de NGINX
-FROM nginx:1.21.6
+# Usar una imagen base de Ubuntu
+FROM ubuntu:20.04
 
-# Instalar las dependencias necesarias
+# Instalar NGINX y las dependencias necesarias
 RUN apt-get update && \
     apt-get install -y \
+    nginx \
     build-essential \
     git \
     libxml2-dev \
@@ -11,9 +12,10 @@ RUN apt-get update && \
     libjansson-dev \
     libpcre3-dev \
     libssl-dev \
-    wget
+    wget && \
+    rm -rf /var/lib/apt/lists/*  # Limpiar caché de apt
 
-# Clonar el repositorio de ModSecurity
+# Clonar e instalar ModSecurity
 RUN git clone https://github.com/SpiderLabs/ModSecurity.git /modsecurity && \
     cd /modsecurity && \
     git checkout v3.0.5 && \
@@ -24,20 +26,8 @@ RUN git clone https://github.com/SpiderLabs/ModSecurity.git /modsecurity && \
     make && \
     make install
 
-
 # Clonar el conector de ModSecurity para NGINX
 RUN git clone --depth 1 https://github.com/SpiderLabs/ModSecurity-nginx.git /modsecurity-nginx
-
-# Clonar el repositorio de ModSecurity
-RUN git clone --depth 1 https://github.com/SpiderLabs/ModSecurity.git /modsecurity && \
-    cd /modsecurity && \
-    git submodule init && \
-    git submodule update && \
-    ./build.sh && \
-    ./configure && \
-    make && \
-    make install
-
 
 # Copiar el archivo de configuración de NGINX
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
