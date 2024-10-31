@@ -1,5 +1,5 @@
-# Usa una imagen base de NGINX
-FROM nginx:alpine
+# Usa una imagen base específica de NGINX
+FROM nginx:1.21.6-alpine  # Asegúrate de que esta versión coincida con la del módulo compilado
 
 # Instala las dependencias necesarias para ModSecurity y compilación
 RUN apk add --no-cache \
@@ -14,7 +14,7 @@ RUN apk add --no-cache \
     linux-headers \
     zlib-dev
 
-# Clona el repositorio de ModSecurity
+# Clona el repositorio de ModSecurity en una versión estable
 RUN git clone --depth 1 -b v3.0.4 https://github.com/SpiderLabs/ModSecurity.git /modsecurity
 
 # Inicializa y actualiza los submódulos de ModSecurity
@@ -32,7 +32,7 @@ RUN cd /modsecurity && \
 # Clona el repositorio de ModSecurity-nginx
 RUN git clone --depth 1 https://github.com/SpiderLabs/ModSecurity-nginx.git /modsecurity-nginx
 
-# Descarga y descomprime el código fuente de NGINX
+# Descarga y descomprime el código fuente de la versión de NGINX compatible
 RUN curl -L https://nginx.org/download/nginx-1.21.6.tar.gz | tar zx -C / && \
     mv /nginx-1.21.6 /nginx
 
@@ -42,8 +42,9 @@ RUN cd /nginx && \
     make modules && \
     cp objs/ngx_http_modsecurity_module.so /etc/nginx/modules/
 
-# Copia el archivo de configuración de NGINX
+# Copia el archivo de configuración de NGINX y ModSecurity
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY nginx/modsec.conf /etc/nginx/modsec.conf  # Asegúrate de tener este archivo
 
 # Expone el puerto 80
 EXPOSE 80
