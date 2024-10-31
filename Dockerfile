@@ -1,32 +1,70 @@
-# Usa la imagen de nginx estable
-FROM nginx:stable
+# Stage de compilación
+FROM alpine:latest as build-stage
 
-# Instala ModSecurity y sus dependencias
-RUN apt-get update && \
-    apt-get install -y libmodsecurity3 modsecurity-crs wget && \
-    rm -rf /var/lib/apt/lists/*
+# Instalar dependencias necesarias
+RUN apk add --no-cache \
+    git \
+    build-base \
+    automake \
+    autoconf \
+    libtool \
+    pcre-dev \
+    libxml2-dev \
+    yajl-dev \
+    curl-dev \
+    openssl-dev \
+    pkgconfig \
+    flex \
+    bison
 
-# Descarga y descomprime OWASP ModSecurity CRS
-RUN wget https://github.com/SpiderLabs/owasp-modsecurity-crs/archive/refs/tags/v3.3.4.tar.gz -O /tmp/crs.tar.gz && \
-    mkdir /usr/share/modsecurity-crs && \
-    tar -xzf /tmp/crs.tar.gz -C /usr/share/modsecurity-crs --strip-components=1 && \
-    rm /tmp/crs.tar.gz
+# Clonar el repositorio de libmodsecurity
+RUN git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity
 
-# Copia la configuración de NGINX
+# Compilar e instalar libmodsecurity
+RUN cd ModSecurity && \
+    git submodule init && \
+    git submodule update && \
+    ./build.sh && \
+    ./configure && \
+    make && \
+    make install
+
+# Clonar el repositorio de ModSecurity-nginx
+RUN git clone --depth 1 https://github.com/SpiderLabs/ModSecurity-nginx.git
+
+# Descargar y descomprimir NGINX
+RUN curl -O http://nginx.org/download/nginx-1.21.6.tar.gz && \
+    tar -xzvf nginx-1.21.6.tar.gz
+
+# Compilar e instalar NGINX con el módulo ModSecurity
+RUN cd nginx-1.21.6 && \
+    ./configure --with-compat --add-dynamic-module=../ModSecurity-nginx && \
+    make modules
+
+# Descargar las reglas del OWASP CRS v4.3.0
+RUN mkdir -p /usr/local/modsecurity/include && \
+    curl -o /usr/local/modsecurity/include/owasp-crs.tar.gz -L https://github.com/coreruleset/coreruleset/archive/v4.3.0.tar.gz && \
+    tar -xzvf /usr/local/modsecurity/include/owasp-crs.tar.gz -C /usr/local/modsecurity/include/ && \
+    mv /usr/local/modsecurity/include/coreruleset-4.3.0 /usr/local/modsecurity/include/owasp-crs
+
+# Stage de producción
+FROM nginx:stable-alpine as production
+
+# Copiar la biblioteca libmodsecurity de la etapa de compilación a la imagen final
+COPY --from=build-stage /usr/local/lib/libmodsecurity.so* /usr/local/lib/
+COPY --from=build-stage /usr/local/modsecurity/include/ /usr/local/modsecurity/include/
+
+# Copiar el módulo ModSecurity compilado
+COPY --from=build-stage /nginx-1.21.6/objs/ngx_http_modsecurity_module.so /etc/nginx/modules/
+
+# Copiar las reglas del OWASP CRS v4.3.0 a la imagen final
+COPY --from=build-stage /usr/local/modsecurity/include/owasp-crs /etc/modsecurity.d/owasp-crs
+
+# Copiar el archivo de configuración de nginx
 COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 
-# Copia los archivos de configuración de ModSecurity
-RUN cp /usr/share/modsecurity-crs/crs-setup.conf.example /etc/modsecurity.d/crs-setup.conf && \
-    cp -r /usr/share/modsecurity-crs/rules /etc/modsecurity.d/
+# Exponer el puerto
+EXPOSE 80
 
-# Activa ModSecurity en la configuración de NGINX
-RUN echo "Include /etc/modsecurity.d/crs-setup.conf" >> /etc/nginx/nginx.conf && \
-    echo "Include /etc/modsecurity.d/rules/*.conf" >> /etc/nginx/nginx.conf
-
-RUN echo "SecRuleEngine On" >> /etc/modsecurity.d/crs-setup.conf
-
-# Exponer el puerto 80 y 443
-EXPOSE 80 443
-
-# Inicia NGINX
+# Iniciar nginx
 CMD ["nginx", "-g", "daemon off;"]
