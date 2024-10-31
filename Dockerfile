@@ -1,7 +1,11 @@
 # Usar una imagen base de Ubuntu
 FROM ubuntu:20.04
 
-# Instalar NGINX y las dependencias necesarias
+# Establecer la zona horaria y evitar preguntas interactivas durante la instalación
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=America/Argentina/Buenos_Aires 
+
+# Instalar las dependencias necesarias
 RUN apt-get update && \
     apt-get install -y \
     nginx \
@@ -13,9 +17,10 @@ RUN apt-get update && \
     libpcre3-dev \
     libssl-dev \
     wget && \
-    rm -rf /var/lib/apt/lists/*  # Limpiar caché de apt
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Clonar e instalar ModSecurity
+# Clonar el repositorio de ModSecurity
 RUN git clone https://github.com/SpiderLabs/ModSecurity.git /modsecurity && \
     cd /modsecurity && \
     git checkout v3.0.5 && \
