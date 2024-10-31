@@ -1,5 +1,5 @@
 # Usar una imagen base de NGINX
-FROM nginx:latest
+FROM nginx:1.21.6
 
 # Instalar las dependencias necesarias
 RUN apt-get update && \
@@ -27,8 +27,9 @@ RUN git clone --depth 1 https://github.com/SpiderLabs/ModSecurity.git /modsecuri
 # Clonar el conector de ModSecurity para NGINX
 RUN git clone --depth 1 https://github.com/SpiderLabs/ModSecurity-nginx.git /modsecurity-nginx
 
-# Configurar el módulo de ModSecurity en NGINX
-RUN wget http://nginx.org/download/nginx-1.21.6.tar.gz && \
+# Descargar y compilar NGINX con el módulo ModSecurity
+RUN cd /modsecurity-nginx && \
+    wget http://nginx.org/download/nginx-1.21.6.tar.gz && \
     tar -xzvf nginx-1.21.6.tar.gz && \
     cd nginx-1.21.6 && \
     ./configure --with-compat --add-module=/modsecurity-nginx && \
@@ -37,8 +38,14 @@ RUN wget http://nginx.org/download/nginx-1.21.6.tar.gz && \
 
 # Copiar el archivo de configuración de NGINX
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
+
+# Descargar y configurar OWASP ModSecurity CRS
+RUN git clone https://github.com/coreruleset/coreruleset.git /etc/nginx/owasp-modsecurity-crs && \
+    mv /etc/nginx/owasp-modsecurity-crs/crs-3.3.0/* /etc/nginx/owasp-modsecurity-crs/ && \
+    rm -rf /etc/nginx/owasp-modsecurity-crs/crs-3.3.0
+
 # Crear un archivo de configuración de ModSecurity
-RUN echo "SecRuleEngine On\nSecRequestBodyAccess On\nInclude /etc/nginx/owasp-modsecurity-crs/base_rules/*.conf" > /etc/nginx/modsec.conf
+RUN echo "SecRuleEngine On\nSecRequestBodyAccess On\nInclude /etc/nginx/owasp-modsecurity-crs/*.conf" > /etc/nginx/modsec.conf
 
 # Exponer el puerto 80
 EXPOSE 80
