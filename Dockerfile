@@ -34,7 +34,7 @@ RUN cd /modsecurity-nginx && \
     cp objs/ngx_http_modsecurity_module.so /etc/nginx/modules/
 
 # Copia el archivo de configuración de NGINX
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
 
 # Expone el puerto 80
 EXPOSE 80
