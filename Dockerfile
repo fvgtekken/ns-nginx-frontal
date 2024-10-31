@@ -16,6 +16,11 @@ RUN apk add --no-cache \
 # Clona el repositorio de ModSecurity
 RUN git clone --depth 1 -b v3.0.4 https://github.com/SpiderLabs/ModSecurity.git /modsecurity
 
+# Inicializa y actualiza los submódulos de ModSecurity
+RUN cd /modsecurity && \
+    git submodule init && \
+    git submodule update
+
 # Compila e instala ModSecurity
 RUN cd /modsecurity && \
     ./build.sh && \
