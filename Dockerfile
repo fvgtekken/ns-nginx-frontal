@@ -1,24 +1,20 @@
-# Usar una imagen base de Ubuntu
-FROM ubuntu:20.04
+# Usar una imagen base de Alpine
+FROM alpine:latest
 
-# Establecer la zona horaria y evitar preguntas interactivas durante la instalación
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=America/Argentina/Buenos_Aires 
-
-# Instalar las dependencias necesarias
-RUN apt-get update && \
-    apt-get install -y \
+# Instalar dependencias necesarias
+RUN apk add --no-cache \
     nginx \
-    build-essential \
+    build-base \
     git \
     libxml2-dev \
-    libcurl4-openssl-dev \
-    libjansson-dev \
-    libpcre3-dev \
-    libssl-dev \
-    wget && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    curl-dev \
+    jansson-dev \
+    pcre-dev \
+    openssl-dev \
+    wget \
+    tzdata && \
+    cp /usr/share/zoneinfo/America/Argentina/Buenos_Aires /etc/localtime && \
+    echo "America/Argentina/Buenos_Aires" > /etc/timezone
 
 # Clonar el repositorio de ModSecurity
 RUN git clone https://github.com/SpiderLabs/ModSecurity.git /modsecurity && \
