@@ -27,14 +27,17 @@ RUN git clone --depth 1 https://github.com/SpiderLabs/ModSecurity.git /modsecuri
 # Clonar el conector de ModSecurity para NGINX
 RUN git clone --depth 1 https://github.com/SpiderLabs/ModSecurity-nginx.git /modsecurity-nginx
 
-# Descargar y compilar NGINX con el módulo ModSecurity
-RUN cd /modsecurity-nginx && \
-    wget http://nginx.org/download/nginx-1.21.6.tar.gz && \
-    tar -xzvf nginx-1.21.6.tar.gz && \
-    cd nginx-1.21.6 && \
-    ./configure --with-compat --add-module=/modsecurity-nginx && \
+# Clonar el repositorio de ModSecurity
+RUN git clone --depth 1 https://github.com/SpiderLabs/ModSecurity.git /modsecurity && \
+    cd /modsecurity && \
+    git checkout v3.0.5 && \ 
+    git submodule init && \
+    git submodule update && \
+    ./build.sh && \
+    ./configure && \
     make && \
     make install
+
 
 # Copiar el archivo de configuración de NGINX
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
