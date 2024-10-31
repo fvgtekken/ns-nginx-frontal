@@ -1,5 +1,5 @@
 # Usa una imagen base específica de NGINX
-FROM nginx:1.21.6-alpine 
+FROM nginx:1.21.6-alpine
 
 # Instala las dependencias necesarias para ModSecurity y compilación
 RUN apk add --no-cache \
@@ -44,7 +44,7 @@ RUN cd /nginx && \
 
 # Copia el archivo de configuración de NGINX y ModSecurity
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
-COPY nginx/modsec.conf /etc/nginx/modsec.conf 
+
 
 # Expone el puerto 80
 EXPOSE 80
