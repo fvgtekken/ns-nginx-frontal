@@ -1,7 +1,7 @@
 # Usa una imagen base de NGINX
 FROM nginx:alpine
 
-# Instala las dependencias necesarias para ModSecurity
+# Instala las dependencias necesarias para ModSecurity y compilación
 RUN apk add --no-cache \
     build-base \
     curl \
@@ -11,7 +11,8 @@ RUN apk add --no-cache \
     autoconf \
     pcre-dev \
     openssl-dev \
-    linux-headers
+    linux-headers \
+    zlib-dev
 
 # Clona el repositorio de ModSecurity
 RUN git clone --depth 1 -b v3.0.4 https://github.com/SpiderLabs/ModSecurity.git /modsecurity
@@ -31,12 +32,13 @@ RUN cd /modsecurity && \
 # Clona el repositorio de ModSecurity-nginx
 RUN git clone --depth 1 https://github.com/SpiderLabs/ModSecurity-nginx.git /modsecurity-nginx
 
-# Clona el repositorio de NGINX
-RUN git clone --depth 1 https://github.com/nginx/nginx.git /nginx
+# Descarga el código fuente de NGINX para compilar
+RUN curl -L https://nginx.org/download/nginx-1.21.6.tar.gz | tar zx && \
+    mv nginx-1.21.6 /nginx
 
 # Compila e instala el módulo ModSecurity para NGINX
 RUN cd /nginx && \
-    ./configure --with-compat --add-dynamic-module=../modsecurity-nginx && \
+    ./auto/configure --with-compat --add-dynamic-module=../modsecurity-nginx && \
     make modules && \
     cp objs/ngx_http_modsecurity_module.so /etc/nginx/modules/
 
