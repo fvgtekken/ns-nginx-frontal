@@ -32,13 +32,13 @@ RUN cd /modsecurity && \
 # Clona el repositorio de ModSecurity-nginx
 RUN git clone --depth 1 https://github.com/SpiderLabs/ModSecurity-nginx.git /modsecurity-nginx
 
-# Descarga el código fuente de NGINX para compilar
-RUN curl -L https://nginx.org/download/nginx-1.21.6.tar.gz | tar zx && \
-    mv nginx-1.21.6 /nginx
+# Descarga y descomprime el código fuente de NGINX
+RUN curl -L https://nginx.org/download/nginx-1.21.6.tar.gz | tar zx -C / && \
+    mv /nginx-1.21.6 /nginx
 
 # Compila e instala el módulo ModSecurity para NGINX
 RUN cd /nginx && \
-    ./auto/configure --with-compat --add-dynamic-module=../modsecurity-nginx && \
+    ./configure --with-compat --add-dynamic-module=../modsecurity-nginx && \
     make modules && \
     cp objs/ngx_http_modsecurity_module.so /etc/nginx/modules/
 
