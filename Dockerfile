@@ -34,7 +34,10 @@ RUN git clone --depth 1 -b v1.0.1 https://github.com/SpiderLabs/ModSecurity-ngin
 # Instala el módulo ModSecurity para NGINX
 RUN cd /modsecurity-nginx && \
     git submodule update --init && \
-    nginx -V 2>&1 | grep -o 'nginx version: .*' | grep -o '[0-9.]*' | xargs -I {} ./configure --with-compat --add-dynamic-module=../modsecurity-nginx && \
+    nginx -V 2>&1 | grep -o 'nginx version: .*' | grep -o '[0-9.]*' | xargs -I {} \
+    git clone --depth 1 -b {}/nginx-compat --single-branch https://github.com/nginx/nginx.git /nginx && \
+    cd /nginx && \
+    ./configure --with-compat --add-dynamic-module=../modsecurity-nginx && \
     make modules && \
     cp objs/ngx_http_modsecurity_module.so /etc/nginx/modules/
 
