@@ -1,5 +1,5 @@
 # Usa una imagen base específica de NGINX
-FROM nginx:1.21.6-alpine  # Asegúrate de que esta versión coincida con la del módulo compilado
+FROM nginx:1.21.6-alpine 
 
 # Instala las dependencias necesarias para ModSecurity y compilación
 RUN apk add --no-cache \
