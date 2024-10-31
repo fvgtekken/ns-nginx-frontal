@@ -14,15 +14,16 @@ RUN apt-get update && \
     wget
 
 # Clonar el repositorio de ModSecurity
-RUN git clone --depth 1 https://github.com/SpiderLabs/ModSecurity.git /modsecurity && \
+RUN git clone https://github.com/SpiderLabs/ModSecurity.git /modsecurity && \
     cd /modsecurity && \
-    git checkout v3.0.4 && \
+    git checkout v3.0.5 && \
     git submodule init && \
     git submodule update && \
     ./build.sh && \
     ./configure && \
     make && \
     make install
+
 
 # Clonar el conector de ModSecurity para NGINX
 RUN git clone --depth 1 https://github.com/SpiderLabs/ModSecurity-nginx.git /modsecurity-nginx
