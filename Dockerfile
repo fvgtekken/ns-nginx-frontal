@@ -1,7 +1,7 @@
-# Usa una imagen base específica de NGINX
-FROM nginx:1.21.6-alpine
+# Etapa 1: Construcción de ModSecurity y NGINX con su módulo
+FROM nginx:1.21.6-alpine AS builder
 
-# Instala las dependencias necesarias para ModSecurity y compilación
+# Instala las dependencias necesarias para ModSecurity y su compilación
 RUN apk add --no-cache \
     build-base \
     curl \
@@ -42,9 +42,17 @@ RUN cd /nginx && \
     make modules && \
     cp objs/ngx_http_modsecurity_module.so /etc/nginx/modules/
 
-# Copia el archivo de configuración de NGINX y ModSecurity
+# Etapa 2: Imagen final de NGINX con ModSecurity
+FROM nginx:1.21.6-alpine
+
+# Copia el módulo de ModSecurity desde la imagen de construcción
+COPY --from=builder /etc/nginx/modules/ngx_http_modsecurity_module.so /etc/nginx/modules/
+
+# Copia los archivos de configuración
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 COPY nginx/modsec.conf /etc/nginx/modsec.conf
+
+# Copia las reglas iniciales (opcional, para que la imagen venga con algunas reglas)
 COPY nginx/rules /etc/nginx/rules
 
 # Expone el puerto 80
