@@ -55,6 +55,10 @@ COPY nginx/modsec.conf /etc/nginx/modsec.conf
 # Copia las reglas iniciales (opcional, para que la imagen venga con algunas reglas)
 COPY nginx/rules /etc/nginx/rules
 
+
+# Configura el path de las librerías para encontrar libmodsecurity.so.3
+ENV LD_LIBRARY_PATH=/usr/local/lib
+
 # Expone el puerto 80
 EXPOSE 80
 
