@@ -235,6 +235,6 @@ Bloque de servidor predeterminado: Este bloque actúa como un servidor de respal
             limit_req zone=req_limit_per_ip burst=20 nodelay;
         }
 
-
-To update only the rules  :
+To update only the rules :
 git commit -am "[update-rules] Added new ModSecurity rule"
+test
