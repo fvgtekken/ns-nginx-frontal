@@ -40,6 +40,8 @@ jobs:
       - name: Verify and create directory on remote server
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p ${{ secrets.WORK_DIR }}/nginx/rules"
+      - name: Copy ModSecurity rules to remote server
+        run: scp -r ./nginx/rules ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/nginx/
       - name: Copy compose.yml to remote server
         run: scp compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}
       - name: connect and pull
