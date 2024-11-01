@@ -2,8 +2,6 @@ name: publish
 on:
   push:
     branches: ['main']
-    paths:
-      - 'nginx/rules/**' # Esto se activa si hay cambios en la carpeta de reglas
 
 env:
   REGISTRY: ghcr.io
