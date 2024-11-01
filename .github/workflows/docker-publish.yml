@@ -2,6 +2,8 @@ name: publish
 on:
   push:
     branches: ['main']
+    paths:
+      - 'nginx/rules/**' # Esto se activa si hay cambios en la carpeta de reglas
 
 env:
   REGISTRY: ghcr.io
@@ -9,10 +11,9 @@ env:
 
 jobs:
   publish:
-    name: publish image
+    name: Publish Image
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && !contains(github.event.head_commit.message, '[update-rules]') }}
-
     steps:
       - uses: actions/checkout@v4
       - name: Login
@@ -25,51 +26,49 @@ jobs:
 
   deploy:
     needs: publish
-    name: deploy image
+    name: Deploy Image
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && !contains(github.event.head_commit.message, '[update-rules]') }}
-
     steps:
-      - name: install ssh keys
+      - name: Install SSH Keys
         run: |
           install -m 600 -D /dev/null ~/.ssh/id_rsa
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
       - uses: actions/checkout@v4
-      - name: Pull latest changes from repository
+      - name: Pull Latest Changes
         run: git pull
         working-directory: ${{ github.workspace }}
-      - name: Verify and create directory on remote server
+      - name: Verify and Create Directory on Remote Server
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p ${{ secrets.WORK_DIR }}/nginx/rules"
-      - name: Copy ModSecurity rules to remote server
+      - name: Copy ModSecurity Rules to Remote Server
         run: scp -r ./nginx/rules ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/nginx/
-      - name: Restart NGINX to apply new rules
+      - name: Restart NGINX to Apply New Rules
         run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose restart"
-      - name: cleanup
+      - name: Cleanup
         run: rm -rf ~/.ssh
 
   update-rules:
-    name: update ModSecurity rules
+    name: Update ModSecurity Rules
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[update-rules]') }}
-
     steps:
-      - name: install ssh keys
+      - name: Install SSH Keys
         run: |
           install -m 600 -D /dev/null ~/.ssh/id_rsa
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
       - uses: actions/checkout@v4
-      - name: Pull latest changes from repository
+      - name: Pull Latest Changes
         run: git pull
         working-directory: ${{ github.workspace }}
-      - name: Verify and create directory on remote server
+      - name: Verify and Create Directory on Remote Server
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p ${{ secrets.WORK_DIR }}/nginx/rules"
-      - name: Copy ModSecurity rules to remote server
+      - name: Copy ModSecurity Rules to Remote Server
         run: scp -r ./nginx/rules ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/nginx/
-      - name: Restart NGINX to apply new rules
+      - name: Restart NGINX to Apply New Rules
         run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose restart"
-      - name: cleanup
+      - name: Cleanup
         run: rm -rf ~/.ssh
