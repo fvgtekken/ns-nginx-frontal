@@ -2,8 +2,11 @@ name: publish
 on:
   push:
     branches: ['main']
+    # Aquí puedes agregar un flag opcional en el mensaje del commit
+    # Por ejemplo, si agregas [update-rules] en el mensaje del commit, se activará el flujo de actualización
+    paths:
+      - 'nginx/rules/**' # Esto se activa si hay cambios en la carpeta de reglas
 env:
-  # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.actor }}/ns-nginx-frontal:latest
 
@@ -11,7 +14,7 @@ jobs:
   publish:
     name: publish image
     runs-on: ubuntu-latest
-
+    if: ${{!contains(github.event.head_commit.message, '[update-rules]') }}
     steps:
       - uses: actions/checkout@v4
       - name: Login
@@ -26,7 +29,6 @@ jobs:
     needs: publish
     name: deploy image
     runs-on: ubuntu-latest
-
     steps:
       - name: install ssh keys
         run: |
@@ -42,9 +44,31 @@ jobs:
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p ${{ secrets.WORK_DIR }}/nginx/rules"
       - name: Copy ModSecurity rules to remote server
         run: scp -r ./nginx/rules ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/nginx/
-      - name: Copy compose.yml to remote server
-        run: scp compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}
-      - name: connect and pull
-        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && docker compose pull && docker compose up -d && exit"
+      - name: Restart NGINX to apply new rules
+        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose restart"
+      - name: cleanup
+        run: rm -rf ~/.ssh
+
+  update-rules:
+    name: update ModSecurity rules
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, '[update-rules]')
+    steps:
+      - name: install ssh keys
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
+      - uses: actions/checkout@v4
+      - name: Pull latest changes from repository
+        run: git pull
+        working-directory: ${{ github.workspace }}
+      - name: Verify and create directory on remote server
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p ${{ secrets.WORK_DIR }}/nginx/rules"
+      - name: Copy ModSecurity rules to remote server
+        run: scp -r ./nginx/rules ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/nginx/
+      - name: Restart NGINX to apply new rules
+        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose restart"
       - name: cleanup
         run: rm -rf ~/.ssh
