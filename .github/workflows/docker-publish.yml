@@ -2,10 +2,9 @@ name: publish
 on:
   push:
     branches: ['main']
-    # Aquí puedes agregar un flag opcional en el mensaje del commit
-    # Por ejemplo, si agregas [update-rules] en el mensaje del commit, se activará el flujo de actualización
     paths:
-      - 'nginx/rules/**' # Esto se activa si hay cambios en la carpeta de reglas
+      - 'nginx/rules/**' # Se activa si hay cambios en la carpeta de reglas
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.actor }}/ns-nginx-frontal:latest
@@ -14,7 +13,7 @@ jobs:
   publish:
     name: publish image
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && !contains(github.event.commits[0].message, '[update-rules]') }}
+    if: ${{ github.event_name == 'push' && !contains(github.event.head_commit.message, '[update-rules]') }}
 
     steps:
       - uses: actions/checkout@v4
@@ -30,6 +29,8 @@ jobs:
     needs: publish
     name: deploy image
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && !contains(github.event.head_commit.message, '[update-rules]') }}
+    
     steps:
       - name: install ssh keys
         run: |
@@ -53,7 +54,8 @@ jobs:
   update-rules:
     name: update ModSecurity rules
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && contains(github.event.commits[0].message, '[update-rules]') }}
+    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[update-rules]') }}
+
     steps:
       - name: install ssh keys
         run: |
