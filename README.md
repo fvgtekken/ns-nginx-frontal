@@ -237,4 +237,4 @@ Bloque de servidor predeterminado: Este bloque actúa como un servidor de respal
 
 To update only the rules :
 git commit -am "[update-rules] Added new ModSecurity rule"
-test 2
+test 3
