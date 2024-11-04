@@ -65,6 +65,8 @@ jobs:
       - name: Copy ModSecurity Rules to Remote Server
         run: scp -r ./nginx/rules ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/nginx/
       - name: Restart NGINX to Apply New Rules
-        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker compose -f ${secrets.WORK_DIR}/docker-compose.yml restart"
+        env:
+          WORK_DIR: ${{ secrets.WORK_DIR }}
+        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker compose -f $WORK_DIR/docker-compose.yml restart"
       - name: Cleanup
         run: rm -rf ~/.ssh
