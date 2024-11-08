@@ -40,6 +40,8 @@ jobs:
       - name: Verify and Create Directory on Remote Server
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p ${{ secrets.WORK_DIR }}/nginx/rules"
+      - name: Copy compose.yml to remote server
+        run: scp compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}
       - name: Copy nginx.conf to Remote Server
         run: scp  ./nginx/nginx.conf ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/nginx/
       - name: Copy ModSecurity Rules to Remote Server
@@ -64,6 +66,8 @@ jobs:
       - name: Verify and Create Directory on Remote Server
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p ${{ secrets.WORK_DIR }}/nginx/rules"
+      - name: Copy compose.yml to remote server
+        run: scp compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}
       - name: Copy nginx.conf to Remote Server
         run: scp  ./nginx/nginx.conf ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/nginx/
       - name: Copy ModSecurity Rules to Remote Server
