@@ -72,9 +72,7 @@ jobs:
         run: scp  ./nginx/nginx.conf ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/nginx/
       - name: Copy ModSecurity Rules to Remote Server
         run: scp -r ./nginx/rules ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/nginx/
-      - name: Restart NGINX to Apply New Rules
-        env:
-          WORK_DIR: ${{ secrets.WORK_DIR }}
-        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker compose -f $WORK_DIR/compose.yml restart"
+      - name: Docker compose up - Apply New Rules - New Config ngix
+        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && docker compose pull && docker compose up -d && exit"
       - name: Cleanup
         run: rm -rf ~/.ssh
