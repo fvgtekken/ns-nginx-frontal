@@ -44,3 +44,5 @@ REQUEST-942-APPLICATION-ATTACK-SQLI.conf
 Propósito: Protege contra ataques de inyección SQL (SQLi), donde un atacante intenta ejecutar comandos SQL en la base de datos.
 Ejemplo: Un atacante envía un parámetro como ' OR '1'='1 en un campo de entrada de usuario.
 Prueba: Envía un input con una inyección SQL básica, como ' OR '1'='1, en un campo de búsqueda o formulario.
+
+https://nextjs.org/docs/pages/building-your-application/configuring/content-security-policy#adding-a-nonce-with-middleware
