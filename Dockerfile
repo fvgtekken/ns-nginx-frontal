@@ -14,8 +14,12 @@ RUN apk add --no-cache \
     linux-headers \
     zlib-dev
 
-# Clona el repositorio de ModSecurity en una versión estable
-RUN git clone --depth 1 -b v3.0.4 https://github.com/SpiderLabs/ModSecurity.git /modsecurity
+# Clona el repositorio de ModSecurity en una versión estable 
+# https://github.com/owasp-modsecurity/ModSecurity-nginx.git
+# https://github.com/owasp-modsecurity/ModSecurity.git
+# RUN git clone --depth 1 -b v3.0.4 https://github.com/SpiderLabs/ModSecurity.git /modsecurity
+
+RUN git clone https://github.com/owasp-modsecurity/ModSecurity.git /modsecurity
 
 # Inicializa y actualiza los submódulos de ModSecurity
 RUN cd /modsecurity && \
