@@ -69,9 +69,9 @@ jobs:
       - name: Copy compose.yml to remote server
         run: scp compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}
       - name: Copy nginx.conf to Remote Server
-        run: scp  ./nginx/nginx.conf ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/nginx/
+        run: scp  ./nginx/nginx.conf ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/nginx/nginx.conf
       - name: Copy modsec.conf to Remote Server
-        run: scp  ./nginx/modsec.conf ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/nginx/
+        run: scp  ./nginx/modsec.conf ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/nginx/modsec.conf
       - name: Copy ModSecurity Rules to Remote Server
         run: scp -r ./nginx/rules ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/nginx/
       - name: Docker compose up - Apply New Rules - New Config ngix
