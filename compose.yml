@@ -9,6 +9,7 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt
       - ./nginx/rules:/etc/nginx/rules
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/modsec.conf:/etc/nginx/modsec.conf
     networks:
       - my-network-front
 networks:
