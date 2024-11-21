@@ -76,7 +76,5 @@ jobs:
         run: scp  ./nginx/modsec.conf ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/nginx/modsec.conf
       - name: Copy ModSecurity Rules to Remote Server
         run: scp -r ./nginx/rules ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/nginx/
-      - name: Docker compose up - Apply New Rules - New Config ngix
-        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && docker compose pull && docker compose up -d && exit"
       - name: Cleanup
         run: rm -rf ~/.ssh
