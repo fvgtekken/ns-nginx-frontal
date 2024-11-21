@@ -47,4 +47,4 @@ Prueba: Envía un input con una inyección SQL básica, como ' OR '1'='1, en un 
 
 https://nextjs.org/docs/pages/building-your-application/configuring/content-security-policy#adding-a-nonce-with-middleware
 
-start nginx
+start nginx s
