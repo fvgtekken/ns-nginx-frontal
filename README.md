@@ -48,3 +48,6 @@ Prueba: Envía un input con una inyección SQL básica, como ' OR '1'='1, en un 
 https://nextjs.org/docs/pages/building-your-application/configuring/content-security-policy#adding-a-nonce-with-middleware
 
 start nginx
+
+commit example to only copy files for modsecurity and nginx
+git commit -am "[update-rules] message"
