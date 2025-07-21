@@ -10,9 +10,12 @@ RUN apk add --no-cache \
     automake \
     autoconf \
     pcre-dev \
+    pcre2-dev \  
     openssl-dev \
     linux-headers \
-    zlib-dev
+    zlib-dev \
+    yajl-dev \
+    libxml2-dev
 
 # Clona el repositorio de ModSecurity en una versión estable 
 # https://github.com/owasp-modsecurity/ModSecurity-nginx.git
