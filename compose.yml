@@ -3,15 +3,17 @@ services:
     container_name: ns-nginx-frontal
     image: ghcr.io/fvgtekken/ns-nginx-frontal:latest
     ports:
-      - 80:80
-      - 443:443
+      - '80:80'
+      - '443:443'
     volumes:
-      - /etc/letsencrypt:/etc/letsencrypt
+      - /etc/letsencrypt:/etc/letsencrypt # <-- FIX typo
+      - /home/fcvg-certbot/www/certbot:/home/fcvg-certbot/www/certbot # <-- ACME webroot
       - ./nginx/rules:/etc/nginx/rules
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/modsec.conf:/etc/nginx/modsec.conf
     networks:
       - my-network-front
+
 networks:
   my-network-front:
     name: default-network-front
